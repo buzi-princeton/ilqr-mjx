@@ -1,0 +1,55 @@
+<mujoco>
+  <compiler autolimits="true"/>
+
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" width="512" height="512" rgb1=".1 .2 .3" rgb2=".2 .3 .4"/>
+    <material name="grid" texture="grid" texrepeat="1 1" texuniform="true" reflectance=".2"/>
+    <mesh name="chasis" scale=".01 .006 .0015"
+      vertex=" 9   2   0
+              -10  10  10
+               9  -2   0
+               10  3  -10
+               10 -3  -10
+              -8   10 -10
+              -10 -10  10
+              -8  -10 -10
+              -5   0   20"/>
+  </asset>
+
+  <default>
+    <joint damping=".03" actuatorfrcrange="-0.5 0.5"/>
+    <geom type="capsule" condim="3" friction="1.0" solimp=".9 .99 .003" solref=".015 1" contype="0" conaffinity="0"/>
+    <default class="wheel">
+      <geom size=".03" fromto="0 0 -0.001 0 0 0.001" rgba=".5 .5 1 1"/>
+    </default>
+  </default>
+
+  <worldbody>
+    <geom name="floor" type="plane" size="3 3 .01" material="grid" contype="0" conaffinity="1" condim="3"/>
+    <body name="car" pos="0 0 .03">
+      <freejoint/>
+      <light name="top light" pos="0 0 2" mode="trackcom" diffuse=".4 .4 .4"/>
+      <geom name="chasis" type="mesh" mesh="chasis"/>
+      <geom name="front_wheel" pos=".08 0 -.015" type="sphere" size=".015" condim="3" friction="0 0 0"/>
+      <body name="left wheel" pos="-.07 .06 0" zaxis="0 1 0">
+        <joint name="left"/>
+        <geom name="left_wheel" class="wheel"/>
+      </body>
+      <body name="right wheel" pos="-.07 -.06 0" zaxis="0 1 0">
+        <joint name="right"/>
+        <geom name="right_wheel" class="wheel"/>
+      </body>
+    </body>
+  </worldbody>
+
+  <contact>
+    <pair geom1="left_wheel" geom2="floor"/>
+    <pair geom1="right_wheel" geom2="floor"/>
+    <pair geom1="front_wheel" geom2="floor"/>
+  </contact>
+
+  <actuator>
+    <motor name="right" joint="right" ctrlrange="-1 1"/>
+    <motor name="left" joint="left" ctrlrange="-1 1"/>
+  </actuator>
+</mujoco>
