@@ -8,6 +8,8 @@ from mujoco import viewer, mjx
 import mujoco
 import copy
 
+jp.set_printoptions(precision=2, suppress=True)
+
 
 def sstep(diffwrt, dobj, sys):
     """
@@ -59,7 +61,7 @@ state_dim = env.sys.nq + env.sys.nv
 ctrl_dim = env.sys.nu
 
 while viewer.is_running():
-    ctrl = 0.1 * jp.ones(env.sys.nu)
+    ctrl = 0.2 * jp.ones(env.sys.nu)
     state = jit_step(state, ctrl)
     x_i = jp.squeeze(
         jp.concatenate([
@@ -68,9 +70,12 @@ while viewer.is_running():
         ],
                        axis=0))
     assert len(x_i) == state_dim + ctrl_dim
-    cur_jac = fjacstep(x_i, state.pipeline_state, env.sys)
-    print(cur_jac[:, :state_dim].shape,
-          cur_jac[:, state_dim:state_dim + ctrl_dim].shape)
+    cur_jac = fjacstep(x_i, state.pipeline_state, env.sys)  # 17x19
+    state_jac = cur_jac[:, :state_dim]  # 17x17
+    ctrl_jac = cur_jac[:, state_dim:state_dim + ctrl_dim]  # 17x2
+    # print(state_jac.shape, ctrl_jac.shape)
+    # print(ctrl_jac)
+
     mjx.get_data_into(data, model, state.pipeline_state)
     viewer.sync()
     time.sleep(0.01)
