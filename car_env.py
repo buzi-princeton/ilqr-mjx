@@ -17,14 +17,11 @@ class Car(PipelineEnv):
     def __init__(self, reset_noise_scale=1e-2, **kwargs):
         # xml_path = "car.xml"
         xml_path = "car_mjx.xml"
-        mj_model = mujoco.MjModel.from_xml_path(str(xml_path))
+        self.mj_model = mujoco.MjModel.from_xml_path(str(xml_path))
 
         # mjx opt settings
-        mj_model.opt.solver = mujoco.mjtSolver.mjSOL_CG
-        mj_model.opt.iterations = 1
-        mj_model.opt.ls_iterations = 4
-
-        sys = mjcf.load_model(mj_model)
+        self.mj_model.opt.solver = mujoco.mjtSolver.mjSOL_CG
+        sys = mjcf.load_model(self.mj_model)
 
         physics_steps_per_control_step = 5
         kwargs['n_frames'] = kwargs.get('n_frames',
@@ -34,8 +31,6 @@ class Car(PipelineEnv):
         super().__init__(sys, **kwargs)
 
         self._reset_noise_scale = reset_noise_scale
-
-        self.viewer = viewer.launch_passive(mj_model, mujoco.MjData(mj_model))
 
     def reset(self, rng: jp.ndarray) -> State:
         rng, rng1, rng2 = jax.random.split(rng, 3)
@@ -57,8 +52,6 @@ class Car(PipelineEnv):
         """Runs one timestep of the environment's dynamics."""
         data0 = state.pipeline_state
         data = self.pipeline_step(data0, action)
-
-        self.viewer.sync()
 
         obs = self._get_obs(data, action)
         reward = 0
