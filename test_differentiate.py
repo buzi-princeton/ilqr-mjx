@@ -61,6 +61,7 @@ state_dim = env.sys.nq + env.sys.nv
 ctrl_dim = env.sys.nu
 
 while viewer.is_running():
+    cur_time = time.time()
     ctrl = 0.2 * jp.ones(env.sys.nu)
     state = jit_step(state, ctrl)
     x_i = jp.squeeze(
@@ -74,8 +75,11 @@ while viewer.is_running():
     state_jac = cur_jac[:, :state_dim]  # 17x17
     ctrl_jac = cur_jac[:, state_dim:state_dim + ctrl_dim]  # 17x2
     # print(state_jac.shape, ctrl_jac.shape)
-    # print(ctrl_jac)
+    # print(state_jac)
 
     mjx.get_data_into(data, model, state.pipeline_state)
     viewer.sync()
-    time.sleep(0.01)
+    # time.sleep(0.01)
+
+    print(time.time() - cur_time)
+    cur_time = time.time()
